@@ -4,6 +4,7 @@ from flask_migrate import Migrate
 from flask import Flask, request, make_response
 from flask_restful import Api, Resource
 import os
+import sqlalchemy
 
 BASE_DIR = os.path.abspath(os.path.dirname(__file__))
 DATABASE = os.environ.get("DB_URI", f"sqlite:///{os.path.join(BASE_DIR, 'app.db')}")
@@ -74,6 +75,8 @@ def post_pizza():
         db.session.add(restaurant_pizza)
         db.session.commit()
         return restaurant_pizza.to_dict(), 201
+    except sqlalchemy.exc.IntegrityError as e:
+        return {"error": str(e)}, 400
     except ValueError:
         return {'errors': ['validation errors']}, 400
 
